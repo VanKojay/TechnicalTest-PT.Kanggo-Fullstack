@@ -7,7 +7,15 @@ let sequelize;
 // Supported dialects: 'sqlite' (local dev), 'mysql', 'postgres' (e.g. Supabase)
 const dialect = process.env.DB_DIALECT || 'mysql';
 
-if (dialect === 'sqlite') {
+if (process.env.NODE_ENV === 'test') {
+  // Tests selalu pakai SQLite in-memory → mandiri, tak butuh DB eksternal,
+  // dan otomatis bersih setiap run. Abaikan DB_DIALECT/.env saat test.
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: ':memory:',
+    logging: false,
+  });
+} else if (dialect === 'sqlite') {
   const storagePath = process.env.DB_STORAGE || path.join(__dirname, '..', '..', 'database.sqlite');
   sequelize = new Sequelize({
     dialect: 'sqlite',
